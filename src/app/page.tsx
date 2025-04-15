@@ -1,103 +1,211 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import emailjs from '@emailjs/browser';
+
+// function MessageBoard() {
+//   const [messages, setMessages] = useState<string[]>([]);
+//   const [input, setInput] = useState('');
+//   const [sending, setSending] = useState(false);
+//   emailjs.init('weQ2MUQ7B-N1yZYIQ')
+
+//   const sendEmail = async (message: string) => {
+//     setSending(true);
+//     try {
+//       const response = await emailjs.send('service_btcw7oy','template_2xrxnun',{message},'weQ2MUQ7B-N1yZYIQ');
+//       console.log('Email sent successfully:', response);
+//     } catch (err) {
+//       console.error('Email send error:', err);
+//       if (err.response) {
+//         console.error('Response error:', err.response);
+//       }
+//     }
+//     setSending(false);
+//   };
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (input.trim() === '') return;
+
+//     setMessages(prev => [...prev, input]);
+//     await sendEmail(input);
+//     setInput('');
+//   };
+
+//   return (
+//     <div className="w-full max-w-md bg-zinc-800 p-4 rounded-2xl shadow-xl text-white space-y-4">
+//       <h2 className="text-xl font-bold"> The Wall of Shame</h2>
+//       <form onSubmit={handleSubmit} className="flex gap-2">
+//         <input
+//           type="text"
+//           value={input}
+//           onChange={e => setInput(e.target.value)}
+//           placeholder="Leave a message for me."
+//           className="flex-grow px-3 py-2 rounded-xl text-black focus:outline-none"
+//         />
+//         <button
+//           type="submit"
+//           className="bg-white text-black px-4 py-2 rounded-xl hover:bg-zinc-200 transition"
+//           disabled={sending}
+//         >
+//           {sending ? 'Sending...' : 'Send'}
+//         </button>
+//       </form>
+//       <div className="space-y-2 max-h-64 overflow-y-auto">
+//         {messages.length === 0 && (
+//           <p className="text-sm text-zinc-400">No messages yet.</p>
+//         )}
+//         {messages.map((msg, idx) => (
+//           <div
+//             key={idx}
+//             className="bg-zinc-700 px-4 py-2 rounded-xl text-sm break-words"
+//           >
+//             {msg}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
+
+function Kaneki() {
+  return (
+      <Image
+        src="/images/kaneki.gif"
+        alt="Kaneki"
+        width={400}
+        height={400}
+        priority
+      />
+  );
+}
+
+function Audio() {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [muted, setMuted] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  // Play the audio or handle auto-play on mute/unmute toggle
+  useEffect(() => {
+    const tryPlay = () => {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.muted = muted;
+        audio.volume = 0.05;
+        audio.play().catch((err) => {
+          console.warn('Autoplay blocked:', err);
+        });
+      }
+    };
+
+    tryPlay();
+
+    // Resume playback after the user clicks anywhere on the screen
+    const resumeOnClick = () => {
+      tryPlay();
+      document.removeEventListener('click', resumeOnClick);
+    };
+
+    document.addEventListener('click', resumeOnClick);
+
+    return () => {
+      document.removeEventListener('click', resumeOnClick);
+    };
+  }, [muted]);
+
+  // Toggle mute state
+  const toggleMute = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.muted = !muted;
+    }
+    setMuted((prev) => !prev);
+
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+  };
+
+  // Define animation variants for the wave effect
+  const waveVariants = {
+    animate: {
+      scaleY: [1, 1.5, 1],
+      opacity: [0.5, 1, 0.5],
+      transition: {
+        duration: 0.6,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      },
+    },
+  };
+
+  return (
+    <>
+      <audio ref={audioRef} src="/bg_music/New Mode.mp3" hidden loop />
+
+      {/* Mute/Unmute Button */}
+      <motion.button
+        onClick={toggleMute}
+        whileTap={{ scale: 0.9 }}
+        className="fixed bottom-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white shadow-xl transition-all duration-300 z-50"
+        aria-label={muted ? 'Unmute' : 'Mute'}
+      >
+        {muted ? (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-2xl"
+          >
+            🔇
+          </motion.span>
+        ) : (
+          <motion.div className="flex gap-[2px] items-end h-5 w-6">
+            {[...Array(4)].map((_, i) => (
+              <motion.div
+                key={i}
+                custom={i * 0.1} // Delay stagger for each wave
+                variants={waveVariants}
+                animate="animate"
+                className="w-[3px] bg-white rounded-sm"
+                style={{ height: `${8 + i * 4}px` }} // Dynamic height for each wave
+              />
+            ))}
+          </motion.div>
+        )}
+      </motion.button>
+
+      {/* Toast Message for Mute/Unmute */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4 }}
+            className="fixed bottom-24 right-6 bg-white/20 text-white backdrop-blur px-4 py-2 rounded-xl shadow-md text-sm font-mono z-40"
+          >
+            {muted ? 'Muted 🔇' : 'Unmuted 🎵'}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-zinc-900">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <Kaneki />{}
+        <Audio /> {/* Audio Player and Mute Button */}
+        <div className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)] text-white">
+          asuno was here. <a href="https://nightlight.gg/u/appatheghoul/stats"><u>dbd stats</u></a>. <a href="https://leetcode.com/u/junsoreos/"><u>leetcode</u>. </a><a href="https://toyhou.se/junssbutt"><u>toyhouse</u>.</a>
+          <br />
+          <br />
+        {/* <MessageBoard /> {} */}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
