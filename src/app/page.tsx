@@ -200,7 +200,7 @@ export default function Home() {
         <Kaneki />{}
         <Audio /> {/* Audio Player and Mute Button */}
         <div className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)] text-white">
-          asuno was here. <a href="https://nightlight.gg/u/appatheghoul/stats"><u>dbd stats</u></a>. <a href="https://leetcode.com/u/junsoreos/"><u>leetcode</u>. </a><a href="https://toyhou.se/junssbutt"><u>toyhouse</u>.</a>
+          asuno was here. he/him. <a href="https://nightlight.gg/u/appatheghoul/stats"><u>dbd stats</u></a>. <a href="https://leetcode.com/u/junsoreos/"><u>leetcode</u>. </a><a href="https://toyhou.se/junssbutt"><u>toyhouse</u>.</a>
           <br />
           <br />
         {/* <MessageBoard /> {} */}
