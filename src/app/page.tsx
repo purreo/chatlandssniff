@@ -205,7 +205,7 @@ export default function Home() {
           <br />
           <br />
         {/* <MessageBoard /> {} */}
-        <Analytics/>{} 
+        <Analytics/>{}
         </div>
       </main>
     </div>
