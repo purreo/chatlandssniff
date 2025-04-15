@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import emailjs from '@emailjs/browser';
+import { Analytics } from "@vercel/analytics/react"
 
 // function MessageBoard() {
 //   const [messages, setMessages] = useState<string[]>([]);
@@ -204,6 +205,7 @@ export default function Home() {
           <br />
           <br />
         {/* <MessageBoard /> {} */}
+        <Analytics/>{} 
         </div>
       </main>
     </div>
